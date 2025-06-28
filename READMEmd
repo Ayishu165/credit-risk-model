@@ -1,0 +1,34 @@
+#  Credit Risk Probability Model for Alternative Data
+##  Overview
+This project develops a Credit Scoring Model for Bati Bank in collaboration with an eCommerce platform offering a Buy Now, Pay Later (BNPL) service. The objective is to evaluate customers' creditworthiness using transaction-level alternative data.
+We aim to:
+- Engineer a proxy risk variable
+- Train machine learning models to assign credit risk scores
+- Predict optimal loan amounts and terms
+- Deploy the model using FastAPI and CI/CD pipelines
+---
+##  Credit Scoring Business Understanding
+
+# 1. Basel II Accord and Interpretability
+The **Basel II Capital Accord** emphasizes accurate risk measurement and sufficient capital allocation based on credit exposure. This mandates:
+- Transparent, interpretable models
+- Regulatory auditability
+- Documented, statistically justified modeling practices
+
+Hence, models must prioritize **interpretability**, often using **Weight of Evidence (WoE)** or **Logistic Regression**, to ensure decisions can be justified.
+---
+# 2. Need for a Proxy Variable
+As no direct "default" indicator is present, we engineer a proxy variable using **Recency, Frequency, and Monetary (RFM)** transaction behavior and **KMeans clustering**. The least active customers are labeled as **high-risk**.
+# Risks:
+- Mislabeling good customers as bad (false negatives)
+- Reputational or financial risks from incorrect credit decisions
+- Ethical risks and bias if alternative data is misused
+---
+
+### 3. Model Choice: Interpretability vs. Performance
+
+ Model Type                                                
+=> Logistic Regression + WoE:   Interpretable, audit-friendly, regulatory-safe 
+=> Gradient Boosting / RF: Higher accuracy, captures non-linearities.
+We balance both: use **Logistic Regression** for explainability and **Boosting models** for performance, enhanced with **SHAP** or **feature importance** explanations.
+
