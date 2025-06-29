@@ -1,0 +1,10 @@
+artifact_location: file:///D:/kaimtenx/project/week5/credit-risk-model/mlruns/171045736881819223/models/m-96fbcab53875445881ab29a168324bcd/artifacts
+creation_timestamp: 1751195325731
+experiment_id: '171045736881819223'
+last_updated_timestamp: 1751195331076
+model_id: m-96fbcab53875445881ab29a168324bcd
+model_type: null
+name: best_model
+source_run_id: ee1b968df6fd4d16bc4604c68e309596
+status: 2
+status_message: null

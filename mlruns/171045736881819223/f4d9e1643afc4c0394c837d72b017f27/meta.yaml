@@ -1,0 +1,14 @@
+artifact_uri: file:///D:/kaimtenx/project/week5/credit-risk-model/mlruns/171045736881819223/f4d9e1643afc4c0394c837d72b017f27/artifacts
+end_time: 1751196716346
+entry_point_name: ''
+experiment_id: '171045736881819223'
+lifecycle_stage: active
+run_id: f4d9e1643afc4c0394c837d72b017f27
+run_name: LogisticRegression
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1751196715488
+status: 3
+tags: []
+user_id: ayish

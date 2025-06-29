@@ -1,0 +1,14 @@
+artifact_uri: file:///D:/kaimtenx/project/week5/credit-risk-model/mlruns/171045736881819223/797c4fc25f2f4e4db747db1ccb0abe8d/artifacts
+end_time: 1751195325655
+entry_point_name: ''
+experiment_id: '171045736881819223'
+lifecycle_stage: active
+run_id: 797c4fc25f2f4e4db747db1ccb0abe8d
+run_name: GradientBoosting
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1751195255660
+status: 3
+tags: []
+user_id: ayish

@@ -1,0 +1,14 @@
+artifact_uri: file:///D:/kaimtenx/project/week5/credit-risk-model/mlruns/171045736881819223/ee1b968df6fd4d16bc4604c68e309596/artifacts
+end_time: 1751195331099
+entry_point_name: ''
+experiment_id: '171045736881819223'
+lifecycle_stage: active
+run_id: ee1b968df6fd4d16bc4604c68e309596
+run_name: best_model
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1751195325672
+status: 3
+tags: []
+user_id: ayish

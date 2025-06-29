@@ -1,50 +1,80 @@
+# src/rfm_proxy.py
+
 import pandas as pd
-from sklearn.cluster import KMeans
+from datetime import timedelta
 from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import KMeans
+import os
 
-# Step 1: Calculate RFM metrics
-def compute_rfm(df):
-    """
-    Compute Recency, Frequency, and Monetary metrics for each customer
-    Recency = Days since last transaction (lower = more recent)
-    Frequency = Number of transactions
-    Monetary = Total transaction amount
-    """
-    snapshot_date = df["TransactionStartTime"].max() + pd.Timedelta(days=1)
-    rfm = df.groupby("CustomerId").agg({
-        "TransactionStartTime": lambda x: (snapshot_date - x.max()).days,
-        "TransactionId": "count",
-        "Amount": "sum"
-    })
-    rfm.columns = ["Recency", "Frequency", "Monetary"]
-    return rfm.reset_index()
+# ------------------- Step 1: Load Data -------------------
+try:
+    # __file__ is not available in some environments (like notebooks), so we use a fallback
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    data_path = os.path.join(base_dir, "../data/raw/data.csv")
+    
+    # Read the CSV file
+    df = pd.read_csv(data_path)
+    print(f"✅ Data loaded from: {data_path}")
 
-# Step 2: Perform KMeans clustering on RFM features
-def cluster_rfm(rfm_df, n_clusters=3):
-    """
-    Cluster customers into groups based on RFM using KMeans
-    Returns: DataFrame with added 'cluster' and 'is_high_risk'
-    """
-    features = ["Recency", "Frequency", "Monetary"]
-    scaler = StandardScaler()
-    rfm_scaled = scaler.fit_transform(rfm_df[features])
+except FileNotFoundError as e:
+    print("❌ File not found. Please make sure 'data.csv' exists in data/raw/")
+    raise e
 
-    # Apply KMeans with fixed random_state for reproducibility
-    kmeans = KMeans(n_clusters=n_clusters, random_state=42)
-    rfm_df["cluster"] = kmeans.fit_predict(rfm_scaled)
+# ------------------- Step 2: Clean Data -------------------
+# Remove any unnamed columns (often index leftovers)
+df = df.loc[:, ~df.columns.str.contains('^Unnamed')]
 
-    # Step 3: Define the high-risk cluster (typically low Frequency and Monetary, high Recency)
-    risk_cluster = rfm_df.groupby("cluster")[["Recency", "Frequency", "Monetary"]].mean()
-    high_risk_cluster = risk_cluster.sort_values(by=["Recency", "Frequency", "Monetary"], ascending=[False, True, True]).index[0]
+# Parse transaction date column
+df['TransactionStartTime'] = pd.to_datetime(df['TransactionStartTime'], errors='coerce')
 
-    # Assign binary risk label
-    rfm_df["is_high_risk"] = (rfm_df["cluster"] == high_risk_cluster).astype(int)
+# Drop rows missing required fields
+df = df.dropna(subset=['CustomerId', 'TransactionStartTime'])
 
-    return rfm_df[["CustomerId", "is_high_risk"]]
+# ------------------- Step 3: RFM Calculation -------------------
+snapshot_date = df['TransactionStartTime'].max() + timedelta(days=1)
 
-# Step 4: Merge high-risk label with processed feature dataset
-def merge_with_processed(processed_df, risk_labels_df):
-    """
-    Merge risk label DataFrame back into the processed dataset by CustomerId
-    """
-    return processed_df.merge(risk_labels_df, on="CustomerId", how="left").fillna({"is_high_risk": 0})
+# Group by CustomerId
+rfm = df.groupby('CustomerId').agg({
+    'TransactionStartTime': lambda x: (snapshot_date - x.max()).days,  # Recency
+    'TransactionId': 'count',                                          # Frequency
+    'Amount': 'sum'                                                    # Monetary
+}).reset_index()
+
+# Rename columns
+rfm.columns = ['CustomerId', 'Recency', 'Frequency', 'Monetary']
+
+# Fill any missing values in Monetary
+rfm['Monetary'] = rfm['Monetary'].fillna(0)
+
+# ------------------- Step 4: Scale RFM + Cluster -------------------
+scaler = StandardScaler()
+rfm_scaled = scaler.fit_transform(rfm[['Recency', 'Frequency', 'Monetary']])
+
+# KMeans clustering
+kmeans = KMeans(n_clusters=3, random_state=42)
+rfm['cluster'] = kmeans.fit_predict(rfm_scaled)
+
+# Identify high-risk cluster (high Recency, low Frequency & Monetary)
+cluster_stats = rfm.groupby('cluster')[['Recency', 'Frequency', 'Monetary']].mean()
+high_risk_cluster = cluster_stats.sort_values(by=['Frequency', 'Monetary', 'Recency'], ascending=[True, True, False]).index[0]
+
+# Assign binary label
+rfm['is_high_risk'] = (rfm['cluster'] == high_risk_cluster).astype(int)
+
+# ------------------- Step 5: Merge Label to Main Dataset -------------------
+df_labeled = df.merge(rfm[['CustomerId', 'is_high_risk']], on='CustomerId', how='left')
+
+# ------------------- Step 6: Save Outputs -------------------
+# Define output paths
+processed_dir = os.path.join(base_dir, "../data/processed")
+os.makedirs(processed_dir, exist_ok=True)
+
+rfm_output_path = os.path.join(processed_dir, "rfm_metrics.csv")
+labeled_output_path = os.path.join(processed_dir, "train_data.csv")
+
+rfm.to_csv(rfm_output_path, index=False)
+df_labeled.to_csv(labeled_output_path, index=False)
+
+print("✅ RFM metrics and labeled dataset saved successfully.")
+print(f"📄 RFM metrics: {rfm_output_path}")
+print(f"📄 Labeled data: {labeled_output_path}")
