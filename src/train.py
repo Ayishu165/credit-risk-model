@@ -95,5 +95,9 @@ for name, mp in models.items():
 # 7. Save best model to MLflow
 print("\n Registering best model...")
 with mlflow.start_run(run_name="best_model"):
-    mlflow.sklearn.log_model(best_model, "best_model")
-    print(" Best model registered with MLflow.")
+    mlflow.sklearn.log_model(
+        sk_model=best_model,
+        artifact_path="model",
+        registered_model_name="best_model"  # ✅ This is what enables registry access
+    )
+    print("Best model logged and registered with MLflow.")
