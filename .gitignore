@@ -1,2 +1,44 @@
 .venv
 data/
+# MLflow experiment data
+mlruns/
+# .gitignore for credit-risk-model project
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+*.log
+
+# Environment files
+.env
+
+# Jupyter
+.ipynb_checkpoints
+
+# Data
+/data/processed/
+/data/raw/
+*.csv
+*.xlsx
+
+# MLflow
+mlruns/
+mlflow.db
+
+# Docker
+*.pid
+
+# VSCode
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Pytest
+htmlcov/
+.cache/
+.pytest_cache/
